@@ -1,0 +1,21 @@
+# Every push and pull request: the PHP files parse on the oldest and newest PHP the plugin supports, and the zip builds.
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: none
+      - run: find eventvox -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: bin/build-zip.sh 0.0.0-check

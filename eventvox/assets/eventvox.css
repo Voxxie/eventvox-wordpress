@@ -1,0 +1,48 @@
+/* EventVOX lists (events, Pick-Up rounds, volunteer call). Plain and small, so the theme's fonts and colours lead. */
+.eventvox-list {
+    list-style: none;
+    margin: 0 0 1em;
+    padding: 0;
+}
+.eventvox-item {
+    display: flex;
+    gap: 0.75em;
+    align-items: flex-start;
+    padding: 0.6em 0;
+    border-bottom: 1px solid rgba(127, 127, 127, 0.25);
+}
+.eventvox-item:last-child {
+    border-bottom: 0;
+}
+.eventvox-image {
+    flex: 0 0 4.5em;
+    width: 4.5em;
+    height: 4.5em;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.eventvox-text {
+    min-width: 0;
+}
+.eventvox-title {
+    display: block;
+    font-weight: 600;
+}
+.eventvox-meta {
+    display: block;
+    font-size: 0.875em;
+    opacity: 0.75;
+}
+.eventvox-actions {
+    margin: 0;
+}
+.eventvox-button {
+    display: inline-block;
+    text-decoration: none;
+}
+.eventvox-notice {
+    padding: 0.5em 0.75em;
+    border-left: 4px solid #dba617;
+    background: rgba(219, 166, 23, 0.1);
+    font-size: 0.875em;
+}
