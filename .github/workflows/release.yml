@@ -1,0 +1,29 @@
+# A release on GitHub (tag v1.2.0 or 1.2.0) -> eventvox.zip with that version, attached to the release.
+# The plugin on the sites (includes/class-updater.php) offers it as an update within 6 hours.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Check PHP
+        run: find eventvox -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Build eventvox.zip
+        run: bin/build-zip.sh "${TAG#[vV]}"
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+      - name: Attach to the release
+        run: gh release upload "$TAG" eventvox.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
