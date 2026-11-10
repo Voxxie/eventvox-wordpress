@@ -14,25 +14,72 @@ class EventVOX_Settings
     const OPTION = 'eventvox_settings';
     const DEFAULTS = [
         'tenant_uuid' => '',
-        'app_url' => 'https://frontend.ingestel.nl',
-        'api_url' => 'https://backend.ingestel.nl',
+        'app_url' => 'https://eventvox.nl',
+        'api_url' => 'https://api.eventvox.nl',
         'shop_page' => 0,
         'volunteer_page' => 0,
         'pickup_page' => 0,
     ];
+    // Former default addresses: saved by versions before 0.2 (they stored the default), cleared so the default above applies
+    const OLD_DEFAULTS = [
+        'app_url' => ['https://frontend.ingestel.nl'],
+        'api_url' => ['https://backend.ingestel.nl'],
+    ];
+    // Which address migration has run (option eventvox_settings_version)
+    const SETTINGS_VERSION = 2;
 
     public static function init()
     {
         add_action('admin_menu', [__CLASS__, 'menu']);
         add_action('admin_init', [__CLASS__, 'register']);
         add_action('admin_notices', [__CLASS__, 'notice']);
+        add_action('init', [__CLASS__, 'migrate']);
+    }
+
+    /** The settings as saved (an address left empty: the default) */
+    public static function saved()
+    {
+        $saved = get_option(self::OPTION, []);
+        return array_merge(self::DEFAULTS, ['app_url' => '', 'api_url' => ''], is_array($saved) ? $saved : []);
     }
 
     /** All settings, with the defaults for what is not set */
     public static function all()
     {
-        $saved = get_option(self::OPTION, []);
-        return array_merge(self::DEFAULTS, is_array($saved) ? $saved : []);
+        $all = self::saved();
+        foreach (['app_url', 'api_url'] as $key) {
+            if ((string) $all[$key] === '') {
+                $all[$key] = self::DEFAULTS[$key];
+            }
+        }
+        return $all;
+    }
+
+    /**
+     * Once after an update: an address that is a former default (EventVOX moved to eventvox.nl) is cleared, so the
+     * current default applies. An address someone entered on purpose (a test environment) stays.
+     */
+    public static function migrate()
+    {
+        if ((int) get_option('eventvox_settings_version', 0) >= self::SETTINGS_VERSION) {
+            return;
+        }
+        $saved = get_option(self::OPTION, null);
+        if (is_array($saved)) {
+            $changed = false;
+            foreach (self::OLD_DEFAULTS as $key => $olds) {
+                $value = untrailingslashit(strtolower(trim((string) ($saved[$key] ?? ''))));
+                if ($value !== '' && (in_array($value, $olds, true) || $value === self::DEFAULTS[$key])) {
+                    $saved[$key] = '';
+                    $changed = true;
+                }
+            }
+            if ($changed) {
+                update_option(self::OPTION, $saved);
+                EventVOX_API::flush();
+            }
+        }
+        update_option('eventvox_settings_version', self::SETTINGS_VERSION);
     }
 
     public static function get($key)
@@ -82,7 +129,7 @@ class EventVOX_Settings
     {
         $input = is_array($input) ? $input : [];
         $old = self::all();
-        $out = $old;
+        $out = self::saved();
 
         $tenant = strtolower(trim((string) ($input['tenant_uuid'] ?? '')));
         if ($tenant === '' || self::is_uuid($tenant)) {
@@ -93,8 +140,9 @@ class EventVOX_Settings
 
         foreach (['app_url', 'api_url'] as $key) {
             $url = untrailingslashit(esc_url_raw(trim((string) ($input[$key] ?? '')), ['https', 'http']));
-            if ($url === '') {
-                $out[$key] = self::DEFAULTS[$key];
+            // The default (or nothing) is not stored, so a new default reaches this site with an update
+            if ($url === '' || strtolower($url) === self::DEFAULTS[$key]) {
+                $out[$key] = '';
             } elseif (wp_parse_url($url, PHP_URL_SCHEME) === 'https' || self::is_local($url)) {
                 $out[$key] = $url;
             } else {
@@ -107,7 +155,7 @@ class EventVOX_Settings
         }
 
         // Other organisation or address: what is cached belongs to the old one
-        if ($out['tenant_uuid'] !== $old['tenant_uuid'] || $out['api_url'] !== $old['api_url']) {
+        if ($out['tenant_uuid'] !== $old['tenant_uuid'] || ($out['api_url'] ?: self::DEFAULTS['api_url']) !== $old['api_url']) {
             EventVOX_API::flush();
         }
         return $out;
@@ -138,6 +186,7 @@ class EventVOX_Settings
             return;
         }
         $s = self::all();
+        $raw = self::saved();
         $name = self::OPTION;
         ?>
         <div class="wrap">
@@ -175,12 +224,12 @@ class EventVOX_Settings
                     <table class="form-table" role="presentation">
                         <tr>
                             <th scope="row"><label for="eventvox-app"><?php esc_html_e('Adres van EventVOX', 'eventvox'); ?></label></th>
-                            <td><input type="url" class="regular-text code" id="eventvox-app" name="<?php echo esc_attr($name); ?>[app_url]" value="<?php echo esc_attr($s['app_url']); ?>"></td>
+                            <td><input type="url" class="regular-text code" id="eventvox-app" name="<?php echo esc_attr($name); ?>[app_url]" value="<?php echo esc_attr($raw['app_url']); ?>" placeholder="<?php echo esc_attr(self::DEFAULTS['app_url']); ?>"></td>
                         </tr>
                         <tr>
                             <th scope="row"><label for="eventvox-api"><?php esc_html_e('Adres van de EventVOX API', 'eventvox'); ?></label></th>
                             <td>
-                                <input type="url" class="regular-text code" id="eventvox-api" name="<?php echo esc_attr($name); ?>[api_url]" value="<?php echo esc_attr($s['api_url']); ?>">
+                                <input type="url" class="regular-text code" id="eventvox-api" name="<?php echo esc_attr($name); ?>[api_url]" value="<?php echo esc_attr($raw['api_url']); ?>" placeholder="<?php echo esc_attr(self::DEFAULTS['api_url']); ?>">
                                 <p class="description"><?php esc_html_e('Alleen aanpassen als EventVOX je dat vraagt. Leeg: het standaardadres.', 'eventvox'); ?></p>
                             </td>
                         </tr>

@@ -15,6 +15,8 @@ cp -R "$ROOT/eventvox" "$BUILD/eventvox"
 sed -i.bak -E "s/^( \* Version:[[:space:]]+).*/\1$VERSION/" "$BUILD/eventvox/eventvox.php"
 sed -i.bak -E "s/define\('EVENTVOX_VERSION', '[^']*'\)/define('EVENTVOX_VERSION', '$VERSION')/" "$BUILD/eventvox/eventvox.php"
 sed -i.bak -E "s/^(Stable tag:[[:space:]]+).*/\1$VERSION/" "$BUILD/eventvox/readme.txt"
+# The changes written under "= Volgende versie =" belong to this release
+sed -i.bak -E "s/^= Volgende versie =$/= $VERSION =/" "$BUILD/eventvox/readme.txt"
 find "$BUILD/eventvox" -name '*.bak' -delete
 grep -q "Version:           $VERSION" "$BUILD/eventvox/eventvox.php"
 grep -q "define('EVENTVOX_VERSION', '$VERSION')" "$BUILD/eventvox/eventvox.php"

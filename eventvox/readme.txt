@@ -50,6 +50,10 @@ dat het organisatie-ID ontbreekt of dat Pick-Up uit staat).
 
 == Changelog ==
 
+= Volgende versie =
+* EventVOX staat nu op eventvox.nl. De adressen worden bij deze update vanzelf overgezet; een zelf ingevuld adres
+  (een testomgeving) blijft staan.
+
 = 0.1.0 =
 * Eerste versie: webshop, vrijwilligers en Pick-Up in een iframe; komende events, Pick-Up rondes en vrijwilliger worden
   als blok, shortcode en widget; updates via GitHub.
