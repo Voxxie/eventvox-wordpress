@@ -21,6 +21,11 @@ gebruikers in `eventvox/readme.txt` en op de docs-site.
   transient; een fout één minuut. Bezoekers zien niets als er niets te tonen is, beheerders een korte melding.
 - Instellingen > EventVOX: organisatie-ID (tenant-UUID, in EventVOX bij Webshop > Delen), de pagina's met de
   iframes (daar linken de widgets naartoe), en onder Geavanceerd de adressen van EventVOX en de API.
+- De adressen van EventVOX (`https://eventvox.nl`) en de API (`https://api.eventvox.nl`) staan als standaard in
+  `EventVOX_Settings::DEFAULTS` en worden alleen opgeslagen als iemand een ander adres invult (een testomgeving): zo
+  krijgt elke site een nieuw adres met een update. Verhuist EventVOX weer, zet dan het oude adres in `OLD_DEFAULTS` en
+  verhoog `SETTINGS_VERSION`: `migrate()` maakt een opgeslagen oud adres eenmalig leeg (versie 0.1 sloeg de standaard
+  `frontend.ingestel.nl` / `backend.ingestel.nl` wel op).
 - Blokken zonder build-stap: de server tekent ze (`render_callback`); `assets/blocks.js` geeft alleen de voorvertoning
   en de instellingen in de editor.
 

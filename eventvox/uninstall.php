@@ -6,6 +6,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 }
 
 delete_option('eventvox_settings');
+delete_option('eventvox_settings_version');
 delete_site_transient('eventvox_release');
 delete_option('widget_eventvox_events');
 delete_option('widget_eventvox_pickups');
