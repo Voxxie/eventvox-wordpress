@@ -53,6 +53,9 @@ dat het organisatie-ID ontbreekt of dat Pick-Up uit staat).
 = Volgende versie =
 * EventVOX staat nu op eventvox.nl. De adressen worden bij deze update vanzelf overgezet; een zelf ingevuld adres
   (een testomgeving) blijft staan.
+* Een adres van EventVOX met www. ervoor wordt zonder www. bewaard. Daarmee groeien de webshop en het Pick-Up formulier
+  weer mee met hun inhoud (met www. bleven ze op hun starthoogte).
+* De Pick-Up rondes linken zonder eigen pagina naar het losse Pick-Up formulier van EventVOX (lichter en sneller).
 
 = 0.1.0 =
 * Eerste versie: webshop, vrijwilligers en Pick-Up in een iframe; komende events, Pick-Up rondes en vrijwilliger worden

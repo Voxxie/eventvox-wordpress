@@ -3,7 +3,8 @@
  * The small blocks of EventVOX information for a page or a sidebar, drawn on this server from the public API:
  *
  * [eventvox_events aantal="5" knop="Bekijk alle events"]  coming events on sale, each linking to the shop
- * [eventvox_pickup_rondes aantal="5"]                     Pick-Up rounds with places left, with a sign-up button
+ * [eventvox_pickup_rondes aantal="5"]                     Pick-Up rounds with places left, with a sign-up button (to the
+ *                                                         page with [eventvox_pickup], else EventVOX's own form page)
  * [eventvox_vrijwilliger_worden tekst="..."]              the organisation's text for new volunteers, with a button
  *
  * The same output in the widgets (class-widgets.php) and the blocks (class-blocks.php). Links go to the pages of this
@@ -140,7 +141,8 @@ class EventVOX_Lists
             return self::problem($answer);
         }
         $rounds = array_slice($answer['rounds'] ?? [], 0, self::limit($args['limit'] ?? 5));
-        $link = EventVOX_Settings::page_link('pickup_page') ?: EventVOX_Settings::app_link('pickup-signup', ['tenant' => $tenant]);
+        // Without a page of this site: the form on its own page (pickup-embed/, light; not the admin app's pickup-signup)
+        $link = EventVOX_Settings::page_link('pickup_page') ?: EventVOX_Settings::app_link('pickup-embed/', ['tenant' => $tenant]);
         if (!$rounds) {
             return self::wrap('pickup', '<p class="eventvox-empty">' . esc_html__('Er zijn op dit moment geen ophaalrondes met plaats. Kijk later nog eens.', 'eventvox') . '</p>');
         }

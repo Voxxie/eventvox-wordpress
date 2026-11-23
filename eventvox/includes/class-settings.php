@@ -25,8 +25,8 @@ class EventVOX_Settings
         'app_url' => ['https://frontend.ingestel.nl'],
         'api_url' => ['https://backend.ingestel.nl'],
     ];
-    // Which address migration has run (option eventvox_settings_version)
-    const SETTINGS_VERSION = 2;
+    // Which address migration has run (option eventvox_settings_version): 2 the former defaults, 3 www. dropped
+    const SETTINGS_VERSION = 3;
 
     public static function init()
     {
@@ -57,7 +57,8 @@ class EventVOX_Settings
 
     /**
      * Once after an update: an address that is a former default (EventVOX moved to eventvox.nl) is cleared, so the
-     * current default applies. An address someone entered on purpose (a test environment) stays.
+     * current default applies. An address someone entered on purpose (a test environment) stays, without www. (see
+     * without_www).
      */
     public static function migrate()
     {
@@ -73,6 +74,11 @@ class EventVOX_Settings
                     $saved[$key] = '';
                     $changed = true;
                 }
+            }
+            $app = (string) ($saved['app_url'] ?? '');
+            if ($app !== '' && self::without_www($app) !== $app) {
+                $saved['app_url'] = self::without_www($app);
+                $changed = true;
             }
             if ($changed) {
                 update_option(self::OPTION, $saved);
@@ -99,7 +105,7 @@ class EventVOX_Settings
         return self::is_uuid($tenant) ? $tenant : '';
     }
 
-    /** An address of the EventVOX app (shop/, shop/volunteer, pickup-embed/, pickup-signup), with the organisation in it */
+    /** An address of the EventVOX app (shop/, shop/volunteer, shop/buy, pickup-embed/), with the organisation in it */
     public static function app_link($path, array $query = [])
     {
         return add_query_arg(array_map('rawurlencode', $query), untrailingslashit(self::get('app_url')) . '/' . ltrim($path, '/'));
@@ -140,6 +146,9 @@ class EventVOX_Settings
 
         foreach (['app_url', 'api_url'] as $key) {
             $url = untrailingslashit(esc_url_raw(trim((string) ($input[$key] ?? '')), ['https', 'http']));
+            if ($key === 'app_url') {
+                $url = self::without_www($url);
+            }
             // The default (or nothing) is not stored, so a new default reaches this site with an update
             if ($url === '' || strtolower($url) === self::DEFAULTS[$key]) {
                 $out[$key] = '';
@@ -159,6 +168,15 @@ class EventVOX_Settings
             EventVOX_API::flush();
         }
         return $out;
+    }
+
+    /**
+     * The EventVOX app without www.: it sends www. to the bare address, so the frame's messages come from there, and
+     * a frame opened on www. would never grow (assets/embed.js checks the origin)
+     */
+    public static function without_www($url)
+    {
+        return (string) preg_replace('#^(https?://)www\.#i', '$1', (string) $url);
     }
 
     /** http:// only for a test installation on this computer */
