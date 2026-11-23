@@ -24,7 +24,9 @@
 - EventVOX backend (Voxxie/eventvox-backend), without login: `GET /public/shop/{tenant}` (name, `volunteer_signup`,
   `volunteer_intro`), `GET /public/shop/{tenant}/events`, `GET /public/pickups/{tenant}` (`rounds`).
 - EventVOX frontend (Voxxie/eventvox-frontend): `shop/?t=`, `shop/volunteer?t=`, `shop/buy?t=&event=`,
-  `pickup-embed/?tenant=` (framable), `pickup-signup?tenant=` (link target).
+  `pickup-embed/?tenant=` (framable, and the Pick-Up rounds' link target without a page of the site). The app sends
+  `www.` to the bare address: `app_url` is stored without it (`EventVOX_Settings::without_www`), as the frames' messages
+  come from the bare address.
 - A change there must keep these working: sites update the plugin late or never.
 
 ## Conventions
