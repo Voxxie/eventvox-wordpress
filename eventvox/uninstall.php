@@ -11,6 +11,7 @@ delete_site_transient('eventvox_release');
 delete_option('widget_eventvox_events');
 delete_option('widget_eventvox_pickups');
 delete_option('widget_eventvox_volunteer');
+delete_option('widget_eventvox_sponsors');
 
 global $wpdb;
 $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",

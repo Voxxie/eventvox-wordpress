@@ -33,6 +33,14 @@ class EventVOX_Blocks
             'vrijwilliger-worden' => [__('EventVOX vrijwilliger worden', 'eventvox'), __('Een oproep om vrijwilliger te worden.', 'eventvox'), 'heart',
                 ['text' => ['type' => 'string', 'default' => '', 'label' => __('Tekst (leeg: de tekst uit EventVOX)', 'eventvox'), 'multiline' => true]] + $button,
                 function ($a) { return EventVOX_Lists::volunteer($a); }],
+            'sponsoren' => [__('EventVOX sponsoren', 'eventvox'), __('De logo\'s van je sponsoren van dit jaar, per pakket, met een link naar hun site.', 'eventvox'), 'awards',
+                [
+                    'packages' => ['type' => 'string', 'default' => '', 'label' => __('Alleen deze pakketten (bijv. goud, platinum; leeg: alle)', 'eventvox')],
+                    'group' => ['type' => 'boolean', 'default' => true, 'label' => __('Per pakket, met een kopje', 'eventvox')],
+                    'names' => ['type' => 'boolean', 'default' => false, 'label' => __('Naam onder het logo', 'eventvox')],
+                    'year' => ['type' => 'number', 'default' => 0, 'label' => __('Jaar (0: dit jaar)', 'eventvox')],
+                ],
+                function ($a) { return EventVOX_Lists::sponsors($a); }],
         ];
     }
 

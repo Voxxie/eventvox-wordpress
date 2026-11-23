@@ -6,6 +6,9 @@
  * [eventvox_pickup_rondes aantal="5"]                     Pick-Up rounds with places left, with a sign-up button (to the
  *                                                         page with [eventvox_pickup], else EventVOX's own form page)
  * [eventvox_vrijwilliger_worden tekst="..."]              the organisation's text for new volunteers, with a button
+ * [eventvox_sponsoren pakketten="goud,platinum" groeperen="ja" namen="nee" jaar=""]
+ *                                                         the active sponsors of the year (EventVOX > Sponsoring): logos
+ *                                                         linking to their sites, grouped by package, highest first
  *
  * The same output in the widgets (class-widgets.php) and the blocks (class-blocks.php). Links go to the pages of this
  * site set in Instellingen > EventVOX, or else to EventVOX itself. Nothing to show: the shortcode shows nothing (for a
@@ -34,6 +37,10 @@ class EventVOX_Lists
         add_shortcode('eventvox_vrijwilliger_worden', function ($atts) {
             $atts = shortcode_atts(['tekst' => '', 'knop' => ''], $atts, 'eventvox_vrijwilliger_worden');
             return self::volunteer(['text' => $atts['tekst'], 'button' => $atts['knop']]);
+        });
+        add_shortcode('eventvox_sponsoren', function ($atts) {
+            $atts = shortcode_atts(['pakketten' => '', 'groeperen' => 'ja', 'namen' => 'nee', 'jaar' => ''], $atts, 'eventvox_sponsoren');
+            return self::sponsors(['packages' => $atts['pakketten'], 'group' => $atts['groeperen'], 'names' => $atts['namen'], 'year' => $atts['jaar']]);
         });
     }
 
@@ -184,5 +191,106 @@ class EventVOX_Lists
         $link = EventVOX_Settings::page_link('volunteer_page') ?: EventVOX_Settings::app_link('shop/volunteer', ['t' => $tenant]);
         $label = trim((string) ($args['button'] ?? '')) ?: __('Word vrijwilliger', 'eventvox');
         return self::wrap('volunteer', '<div class="eventvox-intro">' . wpautop(esc_html($text)) . '</div>' . self::button($link, $label));
+    }
+
+    /** A shortcode's "ja" / "nee", or a block's or widget's boolean */
+    private static function yes($value, $default)
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+        $value = strtolower(trim((string) $value));
+        return $value === '' ? $default : in_array($value, ['ja', 'yes', 'true', '1', 'aan'], true);
+    }
+
+    /** EventVOX's sponsor packages, highest first (0: none chosen, last and without a name of its own) */
+    private static function packages()
+    {
+        return ['4' => __('Platinum', 'eventvox'), '3' => __('Goud', 'eventvox'), '2' => __('Zilver', 'eventvox'), '1' => __('Brons', 'eventvox')];
+    }
+
+    /** "goud, platinum" (Dutch names, English or numbers) as package keys; nothing known: every package */
+    private static function package_filter($value)
+    {
+        $names = ['platinum' => '4', 'goud' => '3', 'gold' => '3', 'zilver' => '2', 'silver' => '2', 'brons' => '1', 'bronze' => '1'];
+        $keys = [];
+        foreach (preg_split('/[\s,;]+/', strtolower((string) $value), -1, PREG_SPLIT_NO_EMPTY) as $word) {
+            if (isset($names[$word])) {
+                $keys[$names[$word]] = true;
+            } elseif (in_array($word, ['0', '1', '2', '3', '4'], true)) {
+                $keys[$word] = true;
+            }
+        }
+        return $keys;
+    }
+
+    private static function sponsor(array $sponsor, $names)
+    {
+        $name = (string) ($sponsor['name'] ?? '');
+        $logo = (string) ($sponsor['logo_url'] ?? '');
+        $site = trim((string) ($sponsor['website'] ?? ''));
+        // Typed in EventVOX, often without https://
+        if ($site !== '' && !preg_match('#^https?://#i', $site)) {
+            $site = 'https://' . $site;
+        }
+        $site = $site !== '' ? esc_url($site, ['http', 'https']) : '';
+        $content = $logo !== '' && wp_parse_url($logo, PHP_URL_SCHEME) === 'https'
+            ? '<img class="eventvox-sponsor-logo" src="' . esc_url($logo) . '" alt="' . esc_attr($name) . '" loading="lazy">'
+                . ($names ? '<span class="eventvox-sponsor-name">' . esc_html($name) . '</span>' : '')
+            : '<span class="eventvox-sponsor-name">' . esc_html($name) . '</span>';
+        return '<li>' . ($site !== ''
+            ? '<a class="eventvox-sponsor" href="' . $site . '" target="_blank" rel="sponsored noopener">' . $content . '</a>'
+            : '<div class="eventvox-sponsor">' . $content . '</div>') . '</li>';
+    }
+
+    public static function sponsors(array $args = [])
+    {
+        $tenant = EventVOX_Settings::tenant();
+        if ($tenant === '') {
+            return EventVOX_Embeds::setup_hint();
+        }
+        $year = (int) ($args['year'] ?? 0);
+        $year = $year >= 2000 && $year <= 2100 ? $year : 0;
+        $answer = EventVOX_API::get('/public/sponsors/' . $tenant . ($year ? '?year=' . $year : ''));
+        if (is_wp_error($answer)) {
+            return self::problem($answer);
+        }
+        $only = self::package_filter($args['packages'] ?? '');
+        $sponsors = array_values(array_filter($answer, function ($sponsor) use ($only) {
+            return is_array($sponsor) && ($sponsor['name'] ?? '') !== '' && (!$only || isset($only[(string) ($sponsor['package'] ?? '0')]));
+        }));
+        if (!$sponsors) {
+            $note = current_user_can('manage_options')
+                /* translators: %d: year */
+                ? ' ' . sprintf(__('(Beheerder: EventVOX toont de sponsoren die voor %d op actief staan, bij Sponsoring.)', 'eventvox'), $year ?: (int) wp_date('Y'))
+                : '';
+            return self::wrap('sponsors', '<p class="eventvox-empty">' . esc_html__('Er staan nog geen sponsoren op de lijst.', 'eventvox') . esc_html($note) . '</p>');
+        }
+        // Highest package first, then by name
+        usort($sponsors, function ($a, $b) {
+            return ((int) ($b['package'] ?? 0) - (int) ($a['package'] ?? 0)) ?: strnatcasecmp((string) $a['name'], (string) $b['name']);
+        });
+        $names = self::yes($args['names'] ?? false, false);
+        if (!self::yes($args['group'] ?? true, true)) {
+            return self::wrap('sponsors', '<ul class="eventvox-sponsor-grid">' . implode('', array_map(function ($sponsor) use ($names) {
+                return self::sponsor($sponsor, $names);
+            }, $sponsors)) . '</ul>');
+        }
+        $groups = [];
+        foreach ($sponsors as $sponsor) {
+            $groups[(string) ($sponsor['package'] ?? '0')][] = $sponsor;
+        }
+        $packages = self::packages();
+        $out = '';
+        foreach ($groups as $key => $group) {
+            // Without a package: no heading when it is the only group, else "Sponsoren" after the packages
+            $heading = $packages[$key] ?? (count($groups) > 1 ? __('Sponsoren', 'eventvox') : '');
+            $out .= ($heading !== '' ? '<h3 class="eventvox-sponsors-heading">' . esc_html($heading) . '</h3>' : '')
+                . '<ul class="eventvox-sponsor-grid eventvox-sponsor-grid-' . esc_attr($key) . '">'
+                . implode('', array_map(function ($sponsor) use ($names) {
+                    return self::sponsor($sponsor, $names);
+                }, $group)) . '</ul>';
+        }
+        return self::wrap('sponsors', $out);
     }
 }

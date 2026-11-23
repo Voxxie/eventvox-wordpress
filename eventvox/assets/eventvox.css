@@ -1,4 +1,4 @@
-/* EventVOX lists (events, Pick-Up rounds, volunteer call). Plain and small, so the theme's fonts and colours lead. */
+/* EventVOX lists (events, Pick-Up rounds, volunteer call, sponsors). Plain and small, so the theme's fonts and colours lead. */
 .eventvox-list {
     list-style: none;
     margin: 0 0 1em;
@@ -39,6 +39,54 @@
 .eventvox-button {
     display: inline-block;
     text-decoration: none;
+}
+/* Sponsors: a grid of logos; higher packages get larger tiles */
+.eventvox-sponsors-heading {
+    margin: 1.5em 0 0.5em;
+}
+.eventvox-sponsor-grid {
+    list-style: none;
+    margin: 0 0 1em;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
+    gap: 1.25em;
+    align-items: center;
+}
+.eventvox-sponsor-grid-4 {
+    grid-template-columns: repeat(auto-fill, minmax(13em, 1fr));
+}
+.eventvox-sponsor-grid-3 {
+    grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr));
+}
+.eventvox-sponsor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    min-height: 4em;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+}
+.eventvox-sponsor-logo {
+    display: block;
+    max-width: 100%;
+    max-height: 5em;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+.eventvox-sponsor-grid-4 .eventvox-sponsor-logo {
+    max-height: 8em;
+}
+.eventvox-sponsor-grid-3 .eventvox-sponsor-logo {
+    max-height: 6.5em;
+}
+.eventvox-sponsor-name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
 }
 .eventvox-notice {
     padding: 0.5em 0.75em;
