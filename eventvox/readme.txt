@@ -1,6 +1,6 @@
 === EventVOX ===
 Contributors: eventvox
-Tags: events, tickets, webshop, vrijwilligers, pick-up
+Tags: events, tickets, webshop, vrijwilligers, sponsoren
 Requires at least: 5.8
 Tested up to: 6.8
 Requires PHP: 7.4
@@ -18,6 +18,8 @@ Voor organisaties die met EventVOX werken.
   de inhoud. Inloggen, betalen en aanmelden gebeuren bij EventVOX, zoals altijd.
 * **Komende events**, **Pick-Up rondes** en **Vrijwilliger worden**: korte lijsten en oproepen voor een pagina of de
   zijbalk, met een knop naar de webshop, het formulier of de aanmeldpagina.
+* **Sponsoren**: de logo's van je sponsoren van dit jaar, per pakket (Platinum, Goud, Zilver, Brons), met een link naar
+  hun site. Een sponsor die je in EventVOX toevoegt of op actief zet, staat er binnen vijf minuten bij.
 
 Alles kan als blok (zoek op "EventVOX"), als shortcode en als widget.
 
@@ -27,6 +29,8 @@ Shortcodes:
 * `[eventvox_events aantal="5" knop="Naar de webshop"]`
 * `[eventvox_pickup_rondes aantal="5" knop="Aanmelden"]`
 * `[eventvox_vrijwilliger_worden tekst="..." knop="Word vrijwilliger"]`
+* `[eventvox_sponsoren]`, met `pakketten="goud,platinum"` (alleen die pakketten), `groeperen="nee"` (één raster zonder
+  kopjes), `namen="ja"` (naam onder het logo) en `jaar="2026"` (een ander jaar dan dit)
 
 == Installation ==
 
@@ -51,6 +55,8 @@ dat het organisatie-ID ontbreekt of dat Pick-Up uit staat).
 == Changelog ==
 
 = Volgende versie =
+* Nieuw: Sponsoren, als blok, shortcode `[eventvox_sponsoren]` en widget. Een pagina met de logo's van je sponsoren
+  van dit jaar, per pakket, die zichzelf bijhoudt vanuit EventVOX.
 * EventVOX staat nu op eventvox.nl. De adressen worden bij deze update vanzelf overgezet; een zelf ingevuld adres
   (een testomgeving) blijft staan.
 * Een adres van EventVOX met www. ervoor wordt zonder www. bewaard. Daarmee groeien de webshop en het Pick-Up formulier

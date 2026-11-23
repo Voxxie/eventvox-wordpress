@@ -1,7 +1,7 @@
 <?php
 /**
  * Classic widgets (Weergave > Widgets, also in the block widget editor under "Verouderde widget"): Komende events,
- * Pick-Up rondes and Vrijwilliger worden. Each shows a title and the list of EventVOX_Lists.
+ * Pick-Up rondes, Vrijwilliger worden and Sponsoren. Each shows a title and the list of EventVOX_Lists.
  */
 
 if (!defined('ABSPATH')) {
@@ -16,6 +16,7 @@ class EventVOX_Widgets
             register_widget('EventVOX_Widget_Events');
             register_widget('EventVOX_Widget_Pickups');
             register_widget('EventVOX_Widget_Volunteer');
+            register_widget('EventVOX_Widget_Sponsors');
         });
     }
 }
@@ -151,5 +152,28 @@ class EventVOX_Widget_Volunteer extends EventVOX_Widget
     protected function content(array $instance)
     {
         return EventVOX_Lists::volunteer($instance);
+    }
+}
+
+class EventVOX_Widget_Sponsors extends EventVOX_Widget
+{
+    public function __construct()
+    {
+        parent::__construct('eventvox_sponsors', __('EventVOX: Sponsoren', 'eventvox'),
+            ['description' => __('De logo\'s van je sponsoren van dit jaar, met een link naar hun site.', 'eventvox'), 'show_instance_in_rest' => true]);
+    }
+
+    protected function fields()
+    {
+        return [
+            'title' => [__('Titel', 'eventvox'), __('Onze sponsoren', 'eventvox'), 'text'],
+            'packages' => [__('Alleen deze pakketten (bijv. goud, platinum; leeg: alle)', 'eventvox'), '', 'text'],
+        ];
+    }
+
+    protected function content(array $instance)
+    {
+        // A sidebar: one grid of logos, highest package first, without headings
+        return EventVOX_Lists::sponsors(['packages' => $instance['packages'], 'group' => false]);
     }
 }

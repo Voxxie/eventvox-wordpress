@@ -13,6 +13,7 @@ gebruikers in `eventvox/readme.txt` en op de docs-site.
 | Komende events | `[eventvox_events]`, widget, blok | `GET /public/shop/{tenant}/events` |
 | Pick-Up rondes | `[eventvox_pickup_rondes]`, widget, blok | `GET /public/pickups/{tenant}` |
 | Vrijwilliger worden | `[eventvox_vrijwilliger_worden]`, widget, blok | `GET /public/shop/{tenant}` (`volunteer_signup`, `volunteer_intro`) |
+| Sponsoren | `[eventvox_sponsoren]`, widget, blok | `GET /public/sponsors/{tenant}[?year=]` (de actieve sponsoren van het jaar: `name`, `package` 0–4, `website`, `logo_url`); per pakket van hoog naar laag, logo met link naar `website` (`rel="sponsored"`), zonder logo de naam |
 
 - De iframes groeien mee met hun inhoud: de EventVOX-pagina's sturen `{ source: 'eventvox-shop', type: 'height' }`
   (en `type: 'top'` om naar boven te scrollen); `assets/embed.js` luistert alleen naar het frame zelf en naar het

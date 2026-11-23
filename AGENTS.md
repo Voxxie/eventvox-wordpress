@@ -11,8 +11,8 @@
 - `eventvox/eventvox.php`: header (`Version`, `Requires at least: 5.8`, `Requires PHP: 7.4`, `Update URI`), constants,
   includes. One class per part in `eventvox/includes/`:
   `class-settings.php` (Instellingen > EventVOX, option `eventvox_settings`), `class-api.php` (`EventVOX_API::get`,
-  server-side `wp_remote_get` with a transient cache), `class-embeds.php` (iframes), `class-lists.php` (the lists,
-  shared by shortcodes, widgets and blocks), `class-widgets.php`, `class-blocks.php`, `class-updater.php`.
+  server-side `wp_remote_get` with a transient cache), `class-embeds.php` (iframes), `class-lists.php` (the lists and
+  the sponsors, shared by shortcodes, widgets and blocks), `class-widgets.php`, `class-blocks.php`, `class-updater.php`.
 - `eventvox/assets/`: plain JS and CSS, no build step. `embed.js` resizes the frames (messages `{ source:
   'eventvox-shop', type: 'height' | 'top' }`, only from the frame itself and the EventVOX origin); `blocks.js`
   registers the blocks with `wp.element` calls, the server renders them (`render_callback`).
@@ -22,7 +22,8 @@
 
 ## What It Depends On
 - EventVOX backend (Voxxie/eventvox-backend), without login: `GET /public/shop/{tenant}` (name, `volunteer_signup`,
-  `volunteer_intro`), `GET /public/shop/{tenant}/events`, `GET /public/pickups/{tenant}` (`rounds`).
+  `volunteer_intro`), `GET /public/shop/{tenant}/events`, `GET /public/pickups/{tenant}` (`rounds`),
+  `GET /public/sponsors/{tenant}[?year=]` (`name`, `package`, `website`, `logo_url`; `404` with the module off).
 - EventVOX frontend (Voxxie/eventvox-frontend): `shop/?t=`, `shop/volunteer?t=`, `shop/buy?t=&event=`,
   `pickup-embed/?tenant=` (framable, and the Pick-Up rounds' link target without a page of the site). The app sends
   `www.` to the bare address: `app_url` is stored without it (`EventVOX_Settings::without_www`), as the frames' messages

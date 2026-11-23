@@ -10,6 +10,7 @@
     var PanelBody = wp.components.PanelBody;
     var TextControl = wp.components.TextControl;
     var TextareaControl = wp.components.TextareaControl;
+    var ToggleControl = wp.components.ToggleControl;
     var Placeholder = wp.components.Placeholder;
     var ServerSideRender = wp.serverSideRender;
 
@@ -31,13 +32,26 @@
             edit: function (props) {
                 var controls = Object.keys(block.attributes).map(function (key) {
                     var spec = block.attributes[key];
+                    if (spec.type === 'boolean') {
+                        return el(ToggleControl, {
+                            key: key,
+                            label: spec.label,
+                            checked: !!props.attributes[key],
+                            onChange: function (value) {
+                                var update = {};
+                                update[key] = !!value;
+                                props.setAttributes(update);
+                            },
+                        });
+                    }
                     var common = {
                         key: key,
                         label: spec.label,
                         value: props.attributes[key] === undefined || props.attributes[key] === null ? '' : String(props.attributes[key]),
                         onChange: function (value) {
                             var update = {};
-                            update[key] = spec.type === 'number' ? (parseInt(value, 10) || spec.default) : value;
+                            var number = parseInt(value, 10);
+                            update[key] = spec.type === 'number' ? (isNaN(number) ? spec.default : number) : value;
                             props.setAttributes(update);
                         },
                     };

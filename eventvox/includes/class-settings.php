@@ -268,6 +268,7 @@ class EventVOX_Settings
                         '[eventvox_events aantal="5"]' => __('Lijst met komende events, met een link naar de webshop.', 'eventvox'),
                         '[eventvox_pickup_rondes aantal="5"]' => __('De Pick-Up rondes die nog plaats hebben, met een aanmeldknop.', 'eventvox'),
                         '[eventvox_vrijwilliger_worden]' => __('Je tekst voor nieuwe vrijwilligers met een aanmeldknop.', 'eventvox'),
+                        '[eventvox_sponsoren]' => __('De logo\'s van je sponsoren van dit jaar, per pakket, met een link naar hun site.', 'eventvox'),
                     ] as $code => $what) : ?>
                         <tr><td><code><?php echo esc_html($code); ?></code></td><td><?php echo esc_html($what); ?></td></tr>
                     <?php endforeach; ?>
@@ -303,6 +304,7 @@ class EventVOX_Settings
             __('Webshop', 'eventvox') => !is_wp_error($shop),
             __('Vrijwilligers', 'eventvox') => !is_wp_error($shop) && !empty($shop['volunteer_signup']),
             __('Pick-Up', 'eventvox') => !is_wp_error($pickups),
+            __('Sponsoren', 'eventvox') => !is_wp_error(EventVOX_API::get('/public/sponsors/' . $tenant, 60)),
         ];
         echo '<div class="notice notice-success inline"><p>';
         /* translators: %s: organisation name */
